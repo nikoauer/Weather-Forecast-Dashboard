@@ -1,8 +1,8 @@
 // API key 
 var apiKey = "90ba931242e04127d604f04cb6e89a31";
 
-// users input 
-
+var subtitle = document.getElementById("6dayforecast");
+subtitle.style.display = "none"
 
 // listens for button to begin the fetch request 
 var search =  document.getElementById("search");
@@ -17,6 +17,7 @@ function fetchToday(event){
 
     // hide today's weather element 
     todaysWeather.style.display = "";
+    subtitle.style.display = ""
 
     var userInput = document.getElementById("userInput").value;
     
@@ -116,6 +117,7 @@ function forecastWeather() {
 
                 // create a new div for each date
                 var forecastDay = document.createElement("div");
+                forecastDay.classList.add("futureForecast")
 
                 // create elements for date and forecasts
                 var dateElement = document.createElement("h3");
@@ -156,6 +158,7 @@ function forecastWeather() {
       });
 }
 
+// this function saves the user 3 last inputs
 function displayFetchCallButtons() {
     var previousSearches = localStorage.getItem("lastThreeSearches");
     previousSearches = previousSearches ? JSON.parse(previousSearches) : [];
