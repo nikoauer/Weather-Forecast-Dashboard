@@ -27,6 +27,23 @@ function fetchToday(event){
         return response.json();
     })
       .then(function (data) {
+
+        var previousSearches = localStorage.getItem("lastThreeSearches");
+        previousSearches = previousSearches ? JSON.parse(previousSearches) : [];
+      
+        // Add the current search value to the array
+        previousSearches.push(userInput);
+      
+        // Keep only the last three search values
+        if (previousSearches.length > 3) {
+          previousSearches.shift();
+        }
+      
+        // Save the updated array in local storage
+        localStorage.setItem("lastThreeSearches", JSON.stringify(previousSearches));
+      
+        displayFetchCallButtons();
+
         // retrieves specific data needed to be displayed
         var name = data.name;
         var icon = data.weather[0].icon;
@@ -122,21 +139,47 @@ function forecastWeather() {
                 var windSpeedAvg = Math.trunc(windSpeedSum / forecastsForDate.length);
 
                 // create elements for average temperature, humidity, and wind
-                var temperatureElement = document.createElement("p");
-                temperatureElement.textContent = "Temperature:  " + temperatureAvg + "°C";
-                forecastDay.appendChild(temperatureElement);
+                var temperatureEl = document.createElement("p");
+                temperatureEl.textContent = "Temperature:  " + temperatureAvg + "°C";
+                forecastDay.appendChild(temperatureEl);
 
-                var windElement = document.createElement("p");
-                windElement.textContent = "Wind Speed:  " + windSpeedAvg + "KMH";
-                forecastDay.appendChild(windElement);
+                var windEl = document.createElement("p");
+                windEl.textContent = "Wind Speed:  " + windSpeedAvg + "KMH";
+                forecastDay.appendChild(windEl);
 
-                var humidityElement = document.createElement("p");
-                humidityElement.textContent = "Humidity:  " + humidityAvg + "%";
-                forecastDay.appendChild(humidityElement);
+                var humidityEl = document.createElement("p");
+                humidityEl.textContent = "Humidity:  " + humidityAvg + "%";
+                forecastDay.appendChild(humidityEl);
 
-                // append the forecast element to the container in your HTML
-                var forecastContainer = document.getElementById("forecastContainer");
                 forecastContainer.appendChild(forecastDay);
         }
       });
 }
+
+function displayFetchCallButtons() {
+    var previousSearches = localStorage.getItem("lastThreeSearches");
+    previousSearches = previousSearches ? JSON.parse(previousSearches) : [];
+  
+    var containerElement = document.getElementById("historyButtons");
+    containerElement.innerHTML = ""; // Clear the container before adding buttons
+  
+    previousSearches.forEach(function(fetchCall) {
+      // Create a button element
+      var buttonElement = document.createElement("button");
+      buttonElement.textContent = fetchCall;
+  
+      // Add a click event listener to call the fetchBookInfo function with the saved fetch call
+      buttonElement.addEventListener("click", function() {
+        document.getElementById("userInput").value = fetchCall;
+        fetchToday(event);
+      });
+  
+      // Append the button to the container element
+      containerElement.appendChild(buttonElement);
+    });
+  }
+  
+  document.addEventListener("DOMContentLoaded", function() {
+    displayFetchCallButtons();
+  });
+  
