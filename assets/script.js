@@ -15,10 +15,12 @@ todaysWeather.style.display = "none";
 function fetchToday(event){
     event.preventDefault();
 
+    // hide today's weather element 
     todaysWeather.style.display = "";
 
     var userInput = document.getElementById("userInput").value;
     
+    // Fetch the api data 
     var weatherURL = "https://api.openweathermap.org/data/2.5/weather?q=" + userInput + "&appid=" + apiKey + "&units=metric"
     fetch(weatherURL)
     .then(function (response) {
@@ -57,36 +59,84 @@ function fetchToday(event){
       forecastWeather();
 };
 
+// function retrieve future 5 day forecast
 function forecastWeather() {
 
+    // clears the page of prior serach results
+    var forecastDiv = document.getElementById("forecastContainer");
+    forecastDiv.innerHTML = "";
+
+    document.getElementById("forecastContainer").style.display = "";
+
     var userCity = document.getElementById("userInput").value;
-    var forecastURL = "https://api.openweathermap.org/data/2.5/forecast?q=" + userCity + "&cnt=5&appid=" + apiKey + "&units=metric";
+    var forecastURL = "https://api.openweathermap.org/data/2.5/forecast?q=" + userCity + "&appid=" + apiKey + "&units=metric";
     fetch(forecastURL)
     .then(function (response) {
         return response.json();
     })
       .then(function (data) {
         var forecastData = data.list;
+            var forecastByDate = {};
 
-        forecastData.forEach(function (forecast) {
-            var temperature = forecast.main.temp;
-            var humidity = forecast.main.humidity;
-            var windSpeed = forecast.wind.speed;
+            // group forecast data by date
+            forecastData.forEach(function (forecast) {
+                var dateTimestamp = forecast.dt;
+                var date = new Date(dateTimestamp * 1000);
+                // get the time to 00:00:00 to compare dates
+                date.setHours(0, 0, 0, 0);
+                var formattedDate = date.toDateString();
 
-            var dateTimestamp = forecast.dt;
-            var date = new Date(dateTimestamp * 1000);
-            var formattedDate = date.toDateString();
+                if (forecastByDate[formattedDate]) {
+                    forecastByDate[formattedDate].push(forecast);
+                } else {
+                    forecastByDate[formattedDate] = [forecast];
+                }
+            });
 
-            // Create HTML elements to display forecast data
-            var forecastElement = document.createElement("div");
-            forecastElement.innerHTML = "<p>Date: " + formattedDate + "</p>" +
-                "<p>Temperature: " + temperature + "°C</p>" +
-                "<p>Humidity: " + humidity + "%</p>" +
-                "<p>Wind Speed: " + windSpeed + "m/s</p>";
+            // display forecast for each day
+            for (var date in forecastByDate) {
+                var forecastsForDate = forecastByDate[date];
 
-            // Append the forecast element to a container in your HTML
-            var forecastContainer = document.getElementById("forecastContainer");
-            forecastContainer.appendChild(forecastElement);
-        });
-      })
+                // create a new div for each date
+                var forecastDay = document.createElement("div");
+
+                // create elements for date and forecasts
+                var dateElement = document.createElement("h3");
+                dateElement.textContent = date;
+                forecastDay.appendChild(dateElement);
+
+                // calculate average values for each forecast property added across the 3 hour intervals
+                var temperatureSum = 0;
+                var humiditySum = 0;
+                var windSpeedSum = 0;
+
+                forecastsForDate.forEach(function (forecast) {
+                    temperatureSum += forecast.main.temp;
+                    humiditySum += forecast.main.humidity;
+                    windSpeedSum += forecast.wind.speed;
+                });
+
+                // truncate variables to remove decimal points
+                var temperatureAvg = Math.trunc(temperatureSum / forecastsForDate.length);
+                var humidityAvg = Math.trunc(humiditySum / forecastsForDate.length);
+                var windSpeedAvg = Math.trunc(windSpeedSum / forecastsForDate.length);
+
+                // create elements for average temperature, humidity, and wind
+                var temperatureElement = document.createElement("p");
+                temperatureElement.textContent = "Temperature:  " + temperatureAvg + "°C";
+                forecastDay.appendChild(temperatureElement);
+
+                var windElement = document.createElement("p");
+                windElement.textContent = "Wind Speed:  " + windSpeedAvg + "KMH";
+                forecastDay.appendChild(windElement);
+
+                var humidityElement = document.createElement("p");
+                humidityElement.textContent = "Humidity:  " + humidityAvg + "%";
+                forecastDay.appendChild(humidityElement);
+
+                // append the forecast element to the container in your HTML
+                var forecastContainer = document.getElementById("forecastContainer");
+                forecastContainer.appendChild(forecastDay);
+        }
+      });
 }
