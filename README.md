@@ -7,7 +7,7 @@ This project worked with the Open weather API to provide the weather of major ci
 
 ## Usage
 
-Link to live page: 
+Link to live page: https://nikoauer.github.io/Weather-Forecast-Dashboard/
 
 ![alt text](./assets/screenshots/screenshot1.png)
 
