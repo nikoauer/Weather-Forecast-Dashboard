@@ -1,25 +1,21 @@
-
-
 // API key
 var apiKey = "90ba931242e04127d604f04cb6e89a31";
 
-var subtitle = document.getElementById("6dayforecast");
+var subtitle = document.getElementById("futureforecast");
 subtitle.style.display = "none";
+var weatherInformation = document.getElementById("weatherInformation")
+weatherInformation.style.display = "none";
 
 // listens for button to begin the fetch request
 var search = document.getElementById("search");
 search.addEventListener("click", fetchToday);
 
-// this hides the today weather card holder
-var todaysWeather = document.getElementById("todaysWeather");
-todaysWeather.style.display = "none";
-
 function fetchToday(event) {
   event.preventDefault();
 
   // hide today's weather element
-  todaysWeather.style.display = "";
   subtitle.style.display = "";
+  weatherInformation.style.display = "";
 
   var userInput = document.getElementById("userInput").value;
 
